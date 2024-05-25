@@ -25,19 +25,17 @@ def get_episode_info(program_title, program_subtitle):
 
     res = requests.get('https://northboot.xyz/search?q=%21ddg+site%3Afernsehserien.de+' + program_title + ' ' + program_subtitle, headers=headers)
     soup = BeautifulSoup(res.text, 'html.parser')
-    web_title = ''
-    for result in soup.find_all('article'):
-        if('/folgen/' in result.find('a').href):
-            web_title = result.find('h3').text
-            break
 
-    match = re.search(r'(Staffel|Season|S)\s*(\d{1,2})\s*,?\s*(Folge|Episode|E)\s*(\d{1,2})', web_title)
-    if match:
-        season_number = match.group(2)
-        episode_number = match.group(4)
-        return f"{program_title} S{season_number.zfill(2)}E{episode_number.zfill(2)}"
-    else:
-        return None
+    for i, result in enumerate(soup.find_all('article')):
+        if i >= 8:
+            return None
+        result_url = result.find('a').get('href')
+        match = re.search(r'\/folgen\/(\d{1,2})x(\d{1,2})-', result_url)
+        if match:
+            season_number = match.group(1)
+            episode_number = match.group(2)
+            return f"{program_title} S{season_number.zfill(2)}E{episode_number.zfill(2)}"
+    return None
 
 def move_file(program_title, episode_info, file_path, output_path):
     if episode_info:
