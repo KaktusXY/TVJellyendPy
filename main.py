@@ -25,7 +25,11 @@ def get_episode_info(program_title, program_subtitle):
 
     res = requests.get('https://northboot.xyz/search?q=%21ddg+site%3Afernsehserien.de+' + program_title + ' ' + program_subtitle, headers=headers)
     soup = BeautifulSoup(res.text, 'html.parser')
-    web_title = soup.find('h3').text
+    web_title = ''
+    for result in soup.find_all('article'):
+        if('/folgen/' in result.find('a').href):
+            web_title = result.find('h3').text
+            break
 
     match = re.search(r'(Staffel|Season|S)\s*(\d{1,2})\s*,?\s*(Folge|Episode|E)\s*(\d{1,2})', web_title)
     if match:
